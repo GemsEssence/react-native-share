@@ -15,12 +15,15 @@ import {
   StyleSheet,
   Text,
   View,
+  ScrollView,
+  SafeAreaView,
 } from 'react-native';
 
 import Share from 'react-native-share';
 
 import images from './images/imagesBase64';
 import pdfBase64 from './images/pdfBase64';
+import {video} from './videos/videoBase64';
 
 const App = () => {
   const [packageSearch, setPackageSearch] = useState<string>('');
@@ -54,6 +57,26 @@ const App = () => {
   }
 
   /**
+   * Basic share with url & message
+   */
+  const shareUrlWithMessage = async () => {
+    const shareOptions = {
+      title: 'Share file',
+      message: 'Simple share with message',
+      url: 'https://google.com',
+    };
+
+    try {
+      const ShareResponse = await Share.open(shareOptions);
+      console.log('Result =>', ShareResponse);
+      setResult(JSON.stringify(ShareResponse, null, 2));
+    } catch (error) {
+      console.log('Error =>', error);
+      setResult('error: '.concat(getErrorString(error)));
+    }
+  };
+
+  /**
    * This functions share multiple images that
    * you send as the urls param
    */
@@ -77,7 +100,7 @@ const App = () => {
   };
 
   /**
-   * This functions share a image passed using the
+   * This function share an image passed using the
    * url param
    */
   const shareEmailImage = async () => {
@@ -119,7 +142,7 @@ const App = () => {
   };
 
   /**
-   * This functions share a image passed using the
+   * This function share an image passed using the
    * url param
    */
   const shareSingleImage = async () => {
@@ -163,10 +186,47 @@ const App = () => {
     }
   };
 
+  const shareVideoToInstagram = async () => {
+    const shareOptions = {
+      title: 'Share video to instagram',
+      type: 'video/mp4',
+      url: video,
+      social: Share.Social.INSTAGRAM,
+    };
+
+    try {
+      const ShareResponse = await Share.shareSingle(shareOptions);
+      setResult(JSON.stringify(ShareResponse, null, 2));
+    } catch (error) {
+      console.log('Error =>', error);
+      setResult('error: '.concat(getErrorString(error)));
+    }
+  };
+
+  const shareImageToInstagram = async () => {
+    const shareOptions = {
+      title: 'Share image to instagram',
+      type: 'image/jpeg',
+      url: images.image1,
+      social: Share.Social.INSTAGRAM,
+    };
+
+    try {
+      const ShareResponse = await Share.shareSingle(shareOptions);
+      setResult(JSON.stringify(ShareResponse, null, 2));
+    } catch (error) {
+      console.log('Error =>', error);
+      setResult('error: '.concat(getErrorString(error)));
+    }
+  };
+
   const shareToInstagramDirect = async () => {
     const shareOptions = {
-      message: encodeURI('Checkout the great search engine: https://google.com'),
+      message: encodeURI(
+        'Checkout the great search engine: https://google.com',
+      ),
       social: Share.Social.INSTAGRAM,
+      type: 'text/plain',
     };
 
     try {
@@ -183,6 +243,7 @@ const App = () => {
       title: 'Share image to instastory',
       backgroundImage: images.image1,
       social: Share.Social.INSTAGRAM_STORIES,
+      appId: '219376304', //instagram appId
     };
 
     try {
@@ -282,6 +343,23 @@ const App = () => {
     }
   };
 
+  const shareToDiscord = async () => {
+    const shareOptions = {
+      message: 'Example Discord',
+      url: 'https://google.com',
+      social: Share.Social.DISCORD,
+    };
+
+    try {
+      const ShareResponse = await Share.shareSingle(shareOptions);
+      console.log('Response =>', ShareResponse);
+      setResult(JSON.stringify(ShareResponse, null, 2));
+    } catch (error) {
+      console.log('Error =>', error);
+      setResult('error: '.concat(getErrorString(error)));
+    }
+  };
+
   const sharePdfBase64 = async () => {
     const shareOptions = {
       title: '',
@@ -299,17 +377,40 @@ const App = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.welcome}>Welcome to React Native Share Example!</Text>
-      <View style={styles.optionsRow}>
+    <SafeAreaView style={styles.container}>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <Text style={styles.welcome}>
+          Welcome to React Native Share Example!
+        </Text>
+        <View style={styles.button}>
+          <Button onPress={shareUrlWithMessage} title="Share Simple Url" />
+        </View>
         <View style={styles.button}>
           <Button onPress={shareMultipleImages} title="Share Multiple Images" />
         </View>
         <View style={styles.button}>
           <Button onPress={shareSingleImage} title="Share Single Image" />
         </View>
+        <View style={styles.withInputContainer}>
+          <TextInput
+            placeholder="Recipient"
+            onChangeText={setRecipient}
+            value={recipient}
+            style={styles.textInput}
+            keyboardType="number-pad"
+          />
+          <View>
+            <Button onPress={shareSms} title="Share via SMS" />
+          </View>
+        </View>
         <View style={styles.button}>
           <Button onPress={shareEmailImage} title="Share Social: Email" />
+        </View>
+        <View style={styles.button}>
+          <Button onPress={shareVideoToInstagram} title="Share Video to IG" />
+        </View>
+        <View style={styles.button}>
+          <Button onPress={shareImageToInstagram} title="Share Image to IG" />
         </View>
         <View style={styles.button}>
           <Button onPress={shareToInstagramStory} title="Share to IG Story" />
@@ -330,6 +431,9 @@ const App = () => {
           <Button onPress={shareToWhatsApp} title="Share to WhatsApp" />
         </View>
         <View style={styles.button}>
+          <Button onPress={shareToDiscord} title="Share to Discord" />
+        </View>
+        <View style={styles.button}>
           <Button onPress={shareEmailImages} title="Share to Email" />
         </View>
         {Platform.OS === 'ios' && (
@@ -341,18 +445,6 @@ const App = () => {
           <>
             <View style={styles.button}>
               <Button onPress={sharePdfBase64} title="Share Base64'd PDF url" />
-            </View>
-            <View style={styles.withInputContainer}>
-              <TextInput
-                placeholder="Recipient"
-                onChangeText={setRecipient}
-                value={recipient}
-                style={styles.textInput}
-                keyboardType="number-pad"
-              />
-              <View>
-                <Button onPress={shareSms} title="Share Social: SMS" />
-              </View>
             </View>
             <View style={styles.withInputContainer}>
               <TextInput
@@ -372,8 +464,8 @@ const App = () => {
         )}
         <Text style={styles.resultTitle}>Result</Text>
         <Text style={styles.result}>{result}</Text>
-      </View>
-    </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
@@ -407,6 +499,7 @@ const styles = StyleSheet.create({
   },
   optionsRow: {
     justifyContent: 'space-between',
+    width: '80%',
   },
   withInputContainer: {
     alignItems: 'center',
