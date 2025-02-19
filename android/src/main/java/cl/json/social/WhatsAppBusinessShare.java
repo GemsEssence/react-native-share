@@ -17,7 +17,7 @@ public class WhatsAppBusinessShare extends SingleShareIntent {
     private static final String START_CONVERSATION_CLASS = "com.whatsapp.Conversation";
 
     // must be small enough so that both activities are triggered while the app is still on foreground
-    private static final int START_ACTIVITY_TIME_GAP_MS = 10; 
+    private static final int START_ACTIVITY_TIME_GAP_MS = 5; 
 
     public WhatsAppBusinessShare(ReactApplicationContext reactContext) {
         super(reactContext);
